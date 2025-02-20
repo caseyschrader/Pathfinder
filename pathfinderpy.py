@@ -60,4 +60,4 @@ m = folium.Map(location=[center_lat, center_long], zoom_start=11)
 
 folium.GeoJson(slc_roads).add_to(m)
 
-m.save('slc_roads_simple.html')
+display(m)
