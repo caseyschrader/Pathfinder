@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from shapely.geometry import Point, LineString
 import pooch
+import folium 
+
 
 shapefile = pooch.retrieve("https://www2.census.gov/geo/tiger/TIGER2020/ROADS/tl_2020_49035_roads.zip", None)
 
@@ -49,3 +51,13 @@ for idx, row in slc_roads.iterrows():
                     name=road_name,
                     road_type=road_type
                 )
+
+bounds = slc_roads.total_bounds
+center_lat = (bounds[1] + bounds[3]) / 2
+center_long = (bounds[0] + bounds[2]) / 2
+
+m = folium.Map(location=[center_lat, center_long], zoom_start=11)
+
+folium.GeoJson(slc_roads).add_to(m)
+
+m.save('slc_roads_simple.html')
