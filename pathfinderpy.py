@@ -1,6 +1,5 @@
 import geopandas as gpd
 import pandas as pd
-import matplotlib.pyplot as plt
 import networkx as nx
 from shapely.geometry import Point, LineString
 import pooch
@@ -51,7 +50,7 @@ for idx, row in slc_roads.iterrows():
                     name=road_name,
                     road_type=road_type
                 )
-
+#visualizing road_network
 bounds = slc_roads.total_bounds
 center_lat = (bounds[1] + bounds[3]) / 2
 center_long = (bounds[0] + bounds[2]) / 2
@@ -60,4 +59,66 @@ m = folium.Map(location=[center_lat, center_long], zoom_start=11)
 
 folium.GeoJson(slc_roads).add_to(m)
 
-display(m)
+#getting street names
+
+street_names = set(nx.get_edge_attributes(graph, 'name').values())
+
+#print("Number of street names in road network:", len(street_names))
+
+#print("example street names")
+#for street in list(street_names)[:5]:
+#    print(street)
+
+def find_street_name(street_name_search):
+    search = street_name_search.lower()
+
+    street_name_variations = {
+        'street': ['st'],
+        'avenue': ['ave'],
+        'boulevard': ['blvd'],
+        'road': ['rd'],
+        'drive': ['dr'],
+        'lane': ['ln',],
+        'circle': ['cir'],
+        'south': ['s'],
+        'north': ['n'],
+        'west': ['w'],
+        'east': ['e']
+    }
+
+    search_variations = []
+    words = search.split()
+
+    for word in words:
+        for street, var in street_name_variations.items():
+            if word in var or word == street:
+                search_variations.extend(var)
+                break
+        else:
+            search_variations.append(word)
+
+    street_names_lower = {}
+    for street in street_names:
+        if street:
+            lower_case = street.lower()
+            street_names_lower[lower_case] = street
+    matches = []
+    for street in street_names_lower:
+        found_all_terms = True
+        for search_var in search_variations:
+            if search_var not in street:
+                found_all_terms = False
+                break
+        if found_all_terms:
+            matches.append(street_names_lower[street])
+
+    if matches:
+        return matches
+    else:
+        return "Street name not found"
+    
+result = find_street_name('State Street')
+print(result)
+
+result = find_street_name('800 South')
+print(result)
