@@ -3,7 +3,8 @@ import pandas as pd
 import networkx as nx
 from shapely.geometry import Point, LineString
 import pooch
-import folium 
+import folium
+from thefuzz import fuzz, process
 
 
 shapefile = pooch.retrieve("https://www2.census.gov/geo/tiger/TIGER2020/ROADS/tl_2020_49035_roads.zip", None)
@@ -69,56 +70,30 @@ street_names = set(nx.get_edge_attributes(graph, 'name').values())
 #for street in list(street_names)[:5]:
 #    print(street)
 
-def find_street_name(street_name_search):
-    search = street_name_search.lower()
-
-    street_name_variations = {
-        'street': ['st'],
-        'avenue': ['ave'],
-        'boulevard': ['blvd'],
-        'road': ['rd'],
-        'drive': ['dr'],
-        'lane': ['ln',],
-        'circle': ['cir'],
-        'south': ['s'],
-        'north': ['n'],
-        'west': ['w'],
-        'east': ['e']
-    }
-
-    search_variations = []
-    words = search.split()
-
-    for word in words:
-        for street, var in street_name_variations.items():
-            if word in var or word == street:
-                search_variations.extend(var)
-                break
-        else:
-            search_variations.append(word)
-
-    street_names_lower = {}
+def find_street_name(search_term):
+    search_words = search_term.split()
+    main_part = search_words[0]
+    
+    matches = []
     for street in street_names:
         if street:
-            lower_case = street.lower()
-            street_names_lower[lower_case] = street
-    matches = []
-    for street in street_names_lower:
-        found_all_terms = True
-        for search_var in search_variations:
-            if search_var not in street:
-                found_all_terms = False
-                break
-        if found_all_terms:
-            matches.append(street_names_lower[street])
+            street_words = street.split()
+            street_main = street_words[0]
 
-    if matches:
-        return matches
-    else:
-        return "Street name not found"
+            main_score = fuzz.partial_ratio(main_part.lower(), street_main.lower())
+            if main_score >= 95:
+                full_score = fuzz.ratio(search_term.lower(), street.lower())
+                if full_score >= 70:
+                    matches.append((street, main_score, full_score))
     
-result = find_street_name('State Street')
-print(result)
+    matches.sort(key=lambda x: (x[1] + x[2])/2, reverse=True)
+    if matches:
+        return matches[0][0]
+    else:
+        return None
 
-result = find_street_name('800 South')
-print(result)
+tests = ['State Street', '800 South', 'Main Street']
+for test in tests:
+    print(f"\nsearching for: {test}")
+    results = find_street_name(test)
+    print(f"results: {results}")
