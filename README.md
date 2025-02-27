@@ -47,7 +47,7 @@ python3 pathfinder.py
 When prompted:
 1. Enter your starting location as two intersecting streets separated by a comma (e.g., "State Street, 800 South")
 2. Enter your destination location in the same format
-3. The application will calculate the shortest path and open it in your default web browser
+3. The application will calculate the shortest path and save the map as an HTML file named `slc_path.html`
 
 ### Example
 
@@ -58,7 +58,7 @@ Enter your starting location (format: street name, street name): State Street, 4
 Enter your destination (format: street name, street name): 700 East, 900 South
 
 Planning route from State Street & 400 South to 700 East & 900 South...
-Path found! Opening map in your browser...
+Path found! Saving map to slc_path.html
 ```
 
 ## How It Works
@@ -75,7 +75,7 @@ Path found! Opening map in your browser...
      - Nodes are road intersections
      - Edges are road segments
      - Weights are distances between nodes
-   - Applies Dijkstra's algorithm to find the shortest path
+   - Implements an optimized version of Dijkstra's algorithm using a priority queue approach to efficiently find the shortest path
 5. **Visualization**:
    - Creates an interactive map using Folium
    - Marks the start and end intersections
@@ -89,12 +89,13 @@ Path found! Opening map in your browser...
 - Some minor streets or new developments may not be included in the dataset
 
 ## Future Improvements
-- Include information on the path's distance
-- Take into account different road types
-- Calculate path based on shortest travel time
-- Implement alternative routing algorithms
-- Include travel time estimation
+
+- Include path distance information
+- Implement alternative routing algorithms (A*, Bellman-Ford)
+- Include travel time estimation based on road types
 - Improve error handling and user feedback
+- Add ability to automatically open the map in a web browser
+- Implement a graphical user interface (GUI)
 
 ## License
 
